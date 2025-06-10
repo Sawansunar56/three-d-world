@@ -1,6 +1,13 @@
 .App {
   height: 100vh;
   position: relative;
+  overflow: hidden;
+
+  .actual_font {
+    width: 150px;
+    position: relative;
+    z-index: 2;
+  }
 
   .some {
     background: white;
@@ -10,12 +17,36 @@
     right: 100px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      width: 200%;
+      top: -100px;
+      right: 0px;
+      height: 290%;
+      background-color: red;
+      transform: rotateZ(15deg);
+    }
+  }
+
+  .beasty {
+    fill: #fff;
+  }
+
+  .back {
+    fill: black;
+    position: absolute;
+    width: 120%;
+    left: -10px;
+    top: 0px;
+    z-index: 1;
   }
 
   button {
     position: relative;
-    padding: 1rem 2rem;
+    padding: 1em 1.2em;
 
     .vibe {
       position: absolute;
@@ -34,6 +65,10 @@
 
 
     &:hover {
+      .beasty {
+        fill: #19f3d9;
+      }
+
       .vibe {
         opacity: 1.0;
       }
