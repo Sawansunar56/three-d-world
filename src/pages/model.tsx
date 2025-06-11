@@ -23,6 +23,40 @@ const RoomEnvironmentSetup = () => {
   return null;
 }
 
+// THINK: Look at gsap also. it seems it would work here as recommended by chatgpt
+function CameraController({ target }: { target: any }) {
+  const { camera } = useThree();
+  const vec = new THREE.Vector3();
+  const moving = useRef(false);
+
+  useEffect(() => {
+    if (target) {
+      moving.current = true;
+    }
+  }, [target])
+
+  useFrame(() => {
+    // console.log('targetPosition: ', targetPosition)
+    // console.log(target);
+    if (target && target.position && target.position && moving.current) {
+      // console.log('targetPosition: ', targetPosition)
+      // console.log('moving: ', moving)
+      // Lerp camera position
+      camera.position.lerp(vec.copy(target.position), 0.05);
+
+      // Look at origin (or any target)
+      camera.lookAt(target.lookAt);
+
+      // Stop when close enough
+      if (camera.position.distanceTo(target.position) < 0.1) {
+        moving.current = false;
+      }
+    }
+  });
+
+  return null;
+}
+
 // function Model({ scene, animations }: { scene: any, animations: any }) {
 //   const animationName = "CINEMA_4D_Main"
 //   const group = useRef<Group>(null)
@@ -175,9 +209,8 @@ function EmissiveModel({ scene, animations, textures, scale, positions }: { scen
 
 
   // useFrame(() => {
-  //   if (ref.current) {
-  //     ref.current.rotation.y += 0.003
-  //   }
+  //   // console.log(camera.position);
+  //   // console.log(camera);
   // })
 
   return (
@@ -226,14 +259,44 @@ function ModelCusLoad(path: string) {
 }
 
 
-export default function ThreeDSection() {
+function CusScene({ moveCamera, target }: { moveCamera: any, target: any }) {
   const pachecho = ModelCusLoad("/models/pachecho/pachecho.glb");
   const chicken = ModelCusLoad("/models/chicken/chick_stylized_character.glb");
-  console.log(chicken);
+  const controls = useRef<any>(null);
+  const { camera } = useThree();
   const emissionTextures = useLoader(
     TextureLoader,
     availableTextures.map(name => `${textureBasePath}${name}`)
   )
+
+  // useFrame(() => {
+  //   if (controls.current) {
+  //     console.log(camera.position);
+  //     console.log(controls.current.target);
+  //   }
+  //
+  // })
+
+  return (
+    <>
+      <CameraController target={target} />
+      <ambientLight color="white" intensity={0.2} />
+      <directionalLight position={[0, 5, 2]} color="white" intensity={5} />
+      {/* <EmissiveModel scene={chicken.scene} animations={chicken.animations} textures={emissionTextures} scale={[2000, 2000, 2000]} positions={[0, 0, 500]} /> */}
+      <EmissiveModel scene={pachecho.scene} animations={pachecho.animations} textures={emissionTextures} scale={[10, 10, 10]} positions={[400, 0, 500]} />
+      <mesh>
+        <sphereGeometry args={[-90, -80, 100]} />
+        <meshStandardMaterial />
+      </mesh>
+      {/*<Environment preset={"warehouse"} blur={0.8} />*/}
+      {/* <FBXModel url="/models/fantasy_character_fbx/source/Fantasy_Character_24.fbx" /> */}
+      {/* <FBXModel url="/models/pachecho/source/Stylized_Final_Low_10.fbx" /> */}
+      {/* <OrbitControls makeDefault ref={controls} /> */}
+    </>
+  )
+}
+
+export default function ThreeDSection({ moveCamera, target }: { moveCamera: any, target: any }) {
   return (
     <div className="three-d-section">
       <Canvas
@@ -242,18 +305,7 @@ export default function ThreeDSection() {
           toneMappingExposure: -0.5,
         }}
       >
-        <ambientLight color="white" intensity={0.2} />
-        <directionalLight position={[0, 5, 2]} color="white" intensity={5} />
-        <EmissiveModel scene={chicken.scene} animations={chicken.animations} textures={emissionTextures} scale={[2000, 2000, 2000]} positions={[0, 0, 500]} />
-        <EmissiveModel scene={pachecho.scene} animations={pachecho.animations} textures={emissionTextures} scale={[10, 10, 10]} positions={[400, 0, 500]} />
-        <mesh>
-          <sphereGeometry args={[-90, -80, 100]} />
-          <meshStandardMaterial />
-        </mesh>
-        {/*<Environment preset={"warehouse"} blur={0.8} />*/}
-        {/* <FBXModel url="/models/fantasy_character_fbx/source/Fantasy_Character_24.fbx" /> */}
-        {/* <FBXModel url="/models/pachecho/source/Stylized_Final_Low_10.fbx" /> */}
-        <OrbitControls makeDefault />
+        <CusScene moveCamera={moveCamera} target={target} />
       </Canvas>
     </div >
   )

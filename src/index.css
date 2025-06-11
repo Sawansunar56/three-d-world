@@ -24,6 +24,8 @@ a:hover {
 
 body {
   margin: 0;
+  background-color: hsl(85, 90%, 70%);
+  transition: 1s background-color ease-in;
 }
 
 h1 {
@@ -40,7 +42,6 @@ button {
   font-family: inherit;
   /* background-color: #1a1a1a; */
   /* background-color: red; */
-  background-color: transparent;
   cursor: pointer;
   /* transition: border-color 0.25s; */
 }
