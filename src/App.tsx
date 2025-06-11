@@ -44,17 +44,21 @@ function App() {
   const moveCamera = () => {
     setTarget({
       position: new Three.Vector3(570, 160, 320),
-      target: new Three.Vector3(102, 34, 627)
+      lookAt: new Three.Vector3(102, 34, 627)
     });
   }
 
   const handleClick = (index: number) => {
     let back_color = 'hsl(55, 90%, 70%)';
-    moveCamera();
+    // moveCamera();
     // switch (index) {
-    //   case 1:
+    //   case 0:
     //     {
     //       document.body.style.backgroundColor = back_color;
+    //       setTarget({
+    //         position: new Three.Vector3(570, 160, 320),
+    //         lookAt: new Three.Vector3(102, 34, 627)
+    //       });
     //     } break
     // }
   }

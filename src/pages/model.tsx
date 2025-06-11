@@ -1,5 +1,5 @@
 import "./model.css"
-import { FBXLoader, GLTFLoader } from "three/examples/jsm/Addons.js"
+import { FBXLoader, GLTFLoader, RectAreaLightHelper } from "three/examples/jsm/Addons.js"
 import { useRef, useMemo, useEffect } from "react"
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber"
 import { Group } from "three"
@@ -38,7 +38,7 @@ function CameraController({ target }: { target: any }) {
   useFrame(() => {
     // console.log('targetPosition: ', targetPosition)
     // console.log(target);
-    if (target && target.position && target.position && moving.current) {
+    if (target && moving.current) {
       // console.log('targetPosition: ', targetPosition)
       // console.log('moving: ', moving)
       // Lerp camera position
@@ -277,21 +277,35 @@ function CusScene({ moveCamera, target }: { moveCamera: any, target: any }) {
   //
   // })
 
+  // const pochenko_light_place = new THREE.Vector3(0, 100, -500);
+  // <directionalLight position={values} color="white" intensity={5} />
+  const values = new THREE.Vector3(0, 300, 800);
+
+  const lightRef = useRef(null);
+  useEffect(() => {
+    if (lightRef.current) {
+      const helper = new RectAreaLightHelper(lightRef.current);
+      lightRef.current.add(helper);
+    }
+  }, []);
   return (
     <>
-      <CameraController target={target} />
-      <ambientLight color="white" intensity={0.2} />
-      <directionalLight position={[0, 5, 2]} color="white" intensity={5} />
-      {/* <EmissiveModel scene={chicken.scene} animations={chicken.animations} textures={emissionTextures} scale={[2000, 2000, 2000]} positions={[0, 0, 500]} /> */}
+      {/* <CameraController target={target} /> */}
+      <ambientLight color="white" intensity={0} />
+      {/* <directionalLight position={values} color="white" intensity={8} /> */}
+      <rectAreaLight ref={lightRef} color="0xffffff" intensity={30} position={values} width={200} height={200}
+        rotation={[-Math.PI / 3, 0, 0]}
+      />
+      <EmissiveModel scene={chicken.scene} animations={chicken.animations} textures={emissionTextures} scale={[2000, 2000, 2000]} positions={[0, 0, 500]} />
       <EmissiveModel scene={pachecho.scene} animations={pachecho.animations} textures={emissionTextures} scale={[10, 10, 10]} positions={[400, 0, 500]} />
-      <mesh>
-        <sphereGeometry args={[-90, -80, 100]} />
+      <mesh position={values}>
+        {/* <sphereGeometry args={[80, 32, 32]} /> */}
         <meshStandardMaterial />
       </mesh>
       {/*<Environment preset={"warehouse"} blur={0.8} />*/}
       {/* <FBXModel url="/models/fantasy_character_fbx/source/Fantasy_Character_24.fbx" /> */}
       {/* <FBXModel url="/models/pachecho/source/Stylized_Final_Low_10.fbx" /> */}
-      {/* <OrbitControls makeDefault ref={controls} /> */}
+      <OrbitControls makeDefault ref={controls} />
     </>
   )
 }

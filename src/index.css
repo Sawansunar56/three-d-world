@@ -24,7 +24,8 @@ a:hover {
 
 body {
   margin: 0;
-  background-color: hsl(85, 90%, 70%);
+  /* background-color: hsl(85, 90%, 70%); */
+  background-color: hsl(234, 32%, 19%);
   transition: 1s background-color ease-in;
 }
 
