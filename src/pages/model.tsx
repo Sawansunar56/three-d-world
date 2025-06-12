@@ -1,15 +1,20 @@
 import "./model.css"
-import { FBXLoader, GLTFLoader, RectAreaLightHelper } from "three/examples/jsm/Addons.js"
+import {
+  FBXLoader,
+  GLTFLoader,
+  RectAreaLightHelper,
+} from "three/examples/jsm/Addons.js"
 import { useRef, useMemo, useEffect } from "react"
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber"
 import { Group } from "three"
 import { TextureLoader } from "three"
-import { Environment, OrbitControls, useAnimations } from "@react-three/drei"
+import { Environment, OrbitControls, useAnimations, useHelper } from "@react-three/drei"
 import { RoomEnvironment } from "three/examples/jsm/Addons.js"
-import * as THREE from "three";
+import * as THREE from "three"
+import { DirectionalLightHelper } from "three"
 
 const RoomEnvironmentSetup = () => {
-  const { gl, scene } = useThree();
+  const { gl, scene } = useThree()
 
   useMemo(() => {
     const pmremGenerator = new THREE.PMREMGenerator(gl)
@@ -20,18 +25,18 @@ const RoomEnvironmentSetup = () => {
     pmremGenerator.dispose()
   }, [gl, scene])
 
-  return null;
+  return null
 }
 
 // THINK: Look at gsap also. it seems it would work here as recommended by chatgpt
 function CameraController({ target }: { target: any }) {
-  const { camera } = useThree();
-  const vec = new THREE.Vector3();
-  const moving = useRef(false);
+  const { camera } = useThree()
+  const vec = new THREE.Vector3()
+  const moving = useRef(false)
 
   useEffect(() => {
     if (target) {
-      moving.current = true;
+      moving.current = true
     }
   }, [target])
 
@@ -42,19 +47,19 @@ function CameraController({ target }: { target: any }) {
       // console.log('targetPosition: ', targetPosition)
       // console.log('moving: ', moving)
       // Lerp camera position
-      camera.position.lerp(vec.copy(target.position), 0.05);
+      camera.position.lerp(vec.copy(target.position), 0.05)
 
       // Look at origin (or any target)
-      camera.lookAt(target.lookAt);
+      camera.lookAt(target.lookAt)
 
       // Stop when close enough
       if (camera.position.distanceTo(target.position) < 0.1) {
-        moving.current = false;
+        moving.current = false
       }
     }
-  });
+  })
 
-  return null;
+  return null
 }
 
 // function Model({ scene, animations }: { scene: any, animations: any }) {
@@ -99,7 +104,7 @@ function CameraController({ target }: { target: any }) {
 //   )
 // }
 
-const textureBasePath = 'models/fantasy_character/textures/';
+const textureBasePath = "models/fantasy_character/textures/"
 const availableTextures = [
   "BellBlack_emissive.png",
   "Bell_emissive.png",
@@ -143,50 +148,42 @@ const availableTextures = [
   "material_emissive.png",
 ]
 
-
-function EmissiveModel({ scene, animations, textures, scale, positions }: { scene: any, animations: any, textures: any, scale: any, positions: any }) {
+function EmissiveModel({
+  scene,
+  animations,
+  textures,
+  scale,
+  positions,
+  material,
+}: {
+  scene: any
+  animations: any
+  textures: any
+  scale: any
+  positions: any
+  material: any
+}) {
   const animationName = "CINEMA_4D_Main"
   const group = useRef<Group>(null)
 
-  const { actions, mixer } = useAnimations(animations, group);
+  const { actions, mixer } = useAnimations(animations, group)
 
-  const previousAction = useRef<any>(null);
+  const previousAction = useRef<any>(null)
 
-  // useEffect(() => {
-  //   const textureMap = new Map<string, THREE.Texture>()
-  //   availableTextures.forEach((name, i) => {
-  //     textureMap.set(name, textures[i])
-  //   })
-  //
-  //   scene.traverse(child => {
-  //     if (child.isMesh && child.material) {
-  //       const mat = child.material as THREE.MeshStandardMaterial
-  //
-  //       // Fallback if color is pure black
-  //       if (mat.color.equals(new THREE.Color(0x000000))) {
-  //         mat.color = new THREE.Color(0xffffff)
-  //       }
-  //
-  //       // Attempt to find matching emission texture by material name
-  //       const textureName = `${mat.name}_emission`
-  //       if (textureMap.has(textureName)) {
-  //         mat.emissiveMap = textureMap.get(textureName)!
-  //         mat.emissive = new THREE.Color(0xffffff)
-  //         mat.emissiveIntensity = 2
-  //         mat.needsUpdate = true
-  //       } else {
-  //         // Optional fallback: give a neutral emissive color if no map
-  //         mat.emissive = new THREE.Color(0x111111)
-  //       }
-  //     }
-  //   })
-  // }, [scene, textures])
-
-  scene.traverse((child) => {
-    if (child.isMesh) {
-    }
-  });
-
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child.isMesh && material) {
+        // console.log(child)
+        // console.log(material)
+        // console.log("Mesh Name:", child.name)
+        // console.log("Material:", child.material)
+        if (material.chicken) {
+          child.material = material.chicken
+          child.material.chicken.needsUpdate = true
+        }
+      }
+    })
+  }, [scene])
 
   useEffect(() => {
     if (!actions || !animationName) return
@@ -199,19 +196,10 @@ function EmissiveModel({ scene, animations, textures, scale, positions }: { scen
       previousAction.current.fadeOut(0.5)
     }
 
-    currentAction
-      .reset()
-      .fadeIn(0.5)
-      .play()
+    currentAction.reset().fadeIn(0.5).play()
 
     previousAction.current = currentAction
   }, [animationName, actions])
-
-
-  // useFrame(() => {
-  //   // console.log(camera.position);
-  //   // console.log(camera);
-  // })
 
   return (
     <group ref={group}>
@@ -221,52 +209,52 @@ function EmissiveModel({ scene, animations, textures, scale, positions }: { scen
 }
 
 export function FBXModel({ url }: { url: string }) {
-  const fbx = useLoader(FBXLoader, url);
-  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
+  const fbx = useLoader(FBXLoader, url)
+  const mixerRef = useRef<THREE.AnimationMixer | null>(null)
 
   useEffect(() => {
     if (fbx.animations.length > 0) {
-      const mixer = new THREE.AnimationMixer(fbx);
-      const action = mixer.clipAction(fbx.animations[0]);
-      action.play();
-      mixerRef.current = mixer;
+      const mixer = new THREE.AnimationMixer(fbx)
+      const action = mixer.clipAction(fbx.animations[0])
+      action.play()
+      mixerRef.current = mixer
     }
 
     // Enable shadows if needed
     fbx.traverse((child: any) => {
       if (child.isMesh && child.material) {
-        console.log("Material:", child.material);
+        console.log("Material:", child.material)
 
         if (child.material.map) {
-          console.log("Has diffuse map ✅:", child.material.map);
+          console.log("Has diffuse map ✅:", child.material.map)
         } else {
-          console.warn("⚠️ No diffuse map on:", child.name);
+          console.warn("⚠️ No diffuse map on:", child.name)
         }
       }
-    });
-  }, [fbx]);
+    })
+  }, [fbx])
 
   // Update animation each frame
   useFrame((_, delta) => {
-    mixerRef.current?.update(delta);
-  });
+    mixerRef.current?.update(delta)
+  })
 
-  return <primitive object={fbx} />;
+  return <primitive object={fbx} />
 }
 
 function ModelCusLoad(path: string) {
-  return useLoader(GLTFLoader, path);
+  return useLoader(GLTFLoader, path)
 }
 
-
-function CusScene({ moveCamera, target }: { moveCamera: any, target: any }) {
-  const pachecho = ModelCusLoad("/models/pachecho/pachecho.glb");
-  const chicken = ModelCusLoad("/models/chicken/chick_stylized_character.glb");
-  const controls = useRef<any>(null);
-  const { camera } = useThree();
+function CusScene({ moveCamera, target }: { moveCamera: any; target: any }) {
+  const pachecho = ModelCusLoad("/models/pachecho/pachecho.glb")
+  const chicken = ModelCusLoad("/models/chicken/chick_stylized_character.glb")
+  const controls = useRef<any>(null)
+  const { camera } = useThree()
+  console.log(chicken.nodes);
   const emissionTextures = useLoader(
     TextureLoader,
-    availableTextures.map(name => `${textureBasePath}${name}`)
+    availableTextures.map((name) => `${textureBasePath}${name}`)
   )
 
   // useFrame(() => {
@@ -279,30 +267,75 @@ function CusScene({ moveCamera, target }: { moveCamera: any, target: any }) {
 
   // const pochenko_light_place = new THREE.Vector3(0, 100, -500);
   // <directionalLight position={values} color="white" intensity={5} />
-  const values = new THREE.Vector3(0, 300, 800);
 
-  const lightRef = useRef(null);
+  const lightRef = useRef(null)
   useEffect(() => {
     if (lightRef.current) {
-      const helper = new RectAreaLightHelper(lightRef.current);
-      lightRef.current.add(helper);
+      const helper = new RectAreaLightHelper(lightRef.current)
+      lightRef.current.add(helper)
     }
-  }, []);
+  }, [])
+  const values = new THREE.Vector3(500, 0, 800)
+  const back_light = new THREE.Vector3(0, 0, 400)
+  const direc_value = new THREE.Vector3(0, 500, 500);
+  // const light_s = useRef<THREE.DirectionalLightHelper>(null!)
+  // const light_x = useRef<THREE.DirectionalLightHelper>(null!)
+
+  const light_s = useRef<RectAreaLightHelper>(null!)
+  const light_x = useRef<RectAreaLightHelper>(null!)
+
+  // useHelper(light_s, DirectionalLightHelper, 1, 'hotpink');
+  // useHelper(light_x, DirectionalLightHelper, 1, 'hotpink');
+  useHelper(light_s, RectAreaLightHelper, 1);
+  useHelper(light_x, RectAreaLightHelper, 1);
+
   return (
     <>
       {/* <CameraController target={target} /> */}
-      <ambientLight color="white" intensity={0} />
-      {/* <directionalLight position={values} color="white" intensity={8} /> */}
-      <rectAreaLight ref={lightRef} color="0xffffff" intensity={30} position={values} width={200} height={200}
-        rotation={[-Math.PI / 3, 0, 0]}
+      <ambientLight intensity={1} />
+      <directionalLight position={direc_value} color="white" intensity={3} />
+      {/* <directionalLight ref={light_x} position={back_light} color="red" intensity={300} /> */}
+      <rectAreaLight
+        ref={light_s}
+        color="white"
+        intensity={10}
+        position={values}
+        width={200}
+        height={200}
+        rotation={[-Math.PI / 1, 2.3, 0]}
       />
-      <EmissiveModel scene={chicken.scene} animations={chicken.animations} textures={emissionTextures} scale={[2000, 2000, 2000]} positions={[0, 0, 500]} />
-      <EmissiveModel scene={pachecho.scene} animations={pachecho.animations} textures={emissionTextures} scale={[10, 10, 10]} positions={[400, 0, 500]} />
-      <mesh position={values}>
+      <rectAreaLight
+        ref={light_x}
+        color="red"
+        intensity={50}
+        position={back_light}
+        width={200}
+        height={200}
+        rotation={[-Math.PI / 1, 0, 0]}
+      />
+      <EmissiveModel
+        material={chicken.materials}
+        scene={chicken.scene}
+        animations={chicken.animations}
+        textures={emissionTextures}
+        scale={[2000, 2000, 2000]}
+        positions={[0, 0, 500]}
+      />
+      <EmissiveModel
+        material={pachecho.materials}
+        scene={pachecho.scene}
+        animations={pachecho.animations}
+        textures={emissionTextures}
+        scale={[10, 10, 10]}
+        positions={[400, 0, 500]}
+      />
+      <mesh position={back_light}>
         {/* <sphereGeometry args={[80, 32, 32]} /> */}
         <meshStandardMaterial />
       </mesh>
-      {/*<Environment preset={"warehouse"} blur={0.8} />*/}
+      <Environment preset={"city"} blur={1}
+        environmentIntensity={1}
+      />
       {/* <FBXModel url="/models/fantasy_character_fbx/source/Fantasy_Character_24.fbx" /> */}
       {/* <FBXModel url="/models/pachecho/source/Stylized_Final_Low_10.fbx" /> */}
       <OrbitControls makeDefault ref={controls} />
@@ -310,18 +343,24 @@ function CusScene({ moveCamera, target }: { moveCamera: any, target: any }) {
   )
 }
 
-export default function ThreeDSection({ moveCamera, target }: { moveCamera: any, target: any }) {
+export default function ThreeDSection({
+  moveCamera,
+  target,
+}: {
+  moveCamera: any
+  target: any
+}) {
   return (
     <div className="three-d-section">
       <Canvas
         camera={{ position: [0, 500, 1200], fov: 45, near: 0.1, far: 5000 }}
         gl={{
-          toneMappingExposure: -0.5,
+          // toneMappingExposure: -0.5,
+          toneMappingExposure: 1,
         }}
       >
         <CusScene moveCamera={moveCamera} target={target} />
       </Canvas>
-    </div >
+    </div>
   )
 }
-
